@@ -1,0 +1,35 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build output
+bin/
+obj/
+out/
+
+# NuGet
+*.nupkg
+packages/
+
+# Logs and temp files
+*.log
+logs/
+*.tmp
+*.temp
+
+# Secrets / local settings
+secrets.json
+appsettings.Local.json
+
+# EF Core designer files
+Migrations/*.Designer.cs
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dotnet tools (optional)
+.dotnet/tools/
