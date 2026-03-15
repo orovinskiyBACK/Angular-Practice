@@ -5,5 +5,7 @@
         public Guid Id { get; set; }
         public string name { get; set; }
         public string UrlHandle { get; set; }
+
+        public ICollection<BlogPost> BlogPosts { get; set; }
     }
 }

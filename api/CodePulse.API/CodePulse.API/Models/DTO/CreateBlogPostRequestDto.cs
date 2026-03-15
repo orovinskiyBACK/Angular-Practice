@@ -1,4 +1,6 @@
-﻿namespace CodePulse.API.Models.DTO
+﻿using CodePulse.API.Models.Domain;
+
+namespace CodePulse.API.Models.DTO
 {
     public class CreateBlogPostRequestDto
     {
@@ -10,5 +12,6 @@
         public DateTime PublishedDate { get; set; }
         public string Author { get; set; }
         public bool IsVisible { get; set; }
+        public Guid[] Categories { get; set; }
     }
 }

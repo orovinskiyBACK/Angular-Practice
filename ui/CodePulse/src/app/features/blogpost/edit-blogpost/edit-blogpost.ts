@@ -1,25 +1,27 @@
-import { Component, inject } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, effect, inject, input } from '@angular/core';
 import { BlogPostService } from '../services/blog-post-service';
-import { AddBlogPostRequest } from '../models/blogpost.model';
-import { Router } from '@angular/router';
-import { MarkdownComponent } from 'ngx-markdown';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MarkdownModule } from 'ngx-markdown';
 import { CategoryService } from '../../category/services/category-service';
 
 @Component({
-  selector: 'app-add-blogpost',
-  imports: [ReactiveFormsModule, MarkdownComponent],
-  templateUrl: './add-blogpost.html',
-  styleUrl: './add-blogpost.css',
+  selector: 'app-edit-blogpost',
+  imports: [ReactiveFormsModule, MarkdownModule],
+  templateUrl: './edit-blogpost.html',
+  styleUrl: './edit-blogpost.css',
 })
-export class AddBlogpost {
+export class EditBlogpost {
+  id = input<string>();
   blogPostService = inject(BlogPostService);
   categoryService = inject(CategoryService);
-  router = inject(Router);
-  private categoryResourceRef = this.categoryService.getAllCategories();
-  categoriesResponse = this.categoryResourceRef.value;
-  
-  addBlogPostForm = new FormGroup({
+
+  private blogPostRef = this.blogPostService.getBlogPost(this.id);
+  blogPostResponse = this.blogPostRef.value;
+
+  private categoryRef = this.categoryService.getAllCategories();
+  categoriesResponse = this.categoryRef.value;
+
+   editBlogPostForm = new FormGroup({
     title: new FormControl<string>('',{
       nonNullable: true,
       validators: [Validators.required, Validators.maxLength(100), Validators.minLength(10)],
@@ -56,30 +58,24 @@ export class AddBlogpost {
     }),
   });
 
-  onSubmit(){
-    const rawFormValues = this.addBlogPostForm.getRawValue();
-    const requestDto : AddBlogPostRequest = {
-      title: rawFormValues.title,
-      shortDescription: rawFormValues.shortDescription,
-      content: rawFormValues.content,
-      author: rawFormValues.author,
-      featuredImageUrl: rawFormValues.featuredImageUrl,
-      urlHandle: rawFormValues.urlHandle,
-      publishedDate: new Date(rawFormValues.publishedDate),
-      isVisible: rawFormValues.isVisible,
-      categories: rawFormValues.categories ?? [],
+  effectRef = effect(()=>{
+    if (this.blogPostResponse()){
+      this.editBlogPostForm.patchValue({
+      title: this.blogPostResponse()?.title,
+      shortDescription: this.blogPostResponse()?.shortDescription,
+      content: this.blogPostResponse()?.content,
+      author: this.blogPostResponse()?.author,
+      featuredImageUrl: this.blogPostResponse()?.featuredImageUrl,
+      isVisible: this.blogPostResponse()?.isVisible,
+      publishedDate: new Date(this.blogPostResponse()?.publishedDate!).toISOString().split('T')[0],
+      urlHandle: this.blogPostResponse()?.urlHandle,
+      categories: this.blogPostResponse()?.categories.map(x =>x.id),
+    })
     }
-    
-    this.blogPostService.createBlogPost(requestDto)
-    .subscribe({
-      next: (response)=>{
-        console.log(response);
+  });
 
-        this.router.navigate(['/admin/blogpost']);
-      },
-      error: (err)=>{
-        console.error(err);
-      }
-    });
+  onSubmit(){
+    const rawFormValues = this.editBlogPostForm.getRawValue();
+    console.log(rawFormValues);
   }
 }
