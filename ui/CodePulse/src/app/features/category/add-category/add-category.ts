@@ -1,7 +1,9 @@
 import { NonNullAssert } from '@angular/compiler';
-import { Component } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AddCategoryRequest } from '../models/category.model';
+import { CategoryService } from '../services/category-service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-add-category',
@@ -10,6 +12,20 @@ import { AddCategoryRequest } from '../models/category.model';
   styleUrl: './add-category.css',
 })
 export class AddCategory {
+  private router = inject(Router);
+  constructor(){
+    effect(()=>{
+      if (this.categoryService.addCategoryStatus() === 'success'){
+        this.categoryService.addCategoryStatus.set('idle');
+        this.router.navigate(['/admin/categories']);
+      }
+      if (this.categoryService.addCategoryStatus() === 'error'){
+        console.error('Add Category Request Failed');
+      }
+    });
+  }
+
+  private categoryService = inject(CategoryService)
   addCategoriesFormGroup = new FormGroup({
     name: new FormControl<string>('', {
       nonNullable: true,
@@ -35,6 +51,8 @@ export class AddCategory {
     const addCategoryRequestDto: AddCategoryRequest = {
       name: addCategoryFormValue.name,
       urlHandle: addCategoryFormValue.urlHandle
-    }
+    };
+
+    this.categoryService.addCategory(addCategoryRequestDto);
   }
 }
